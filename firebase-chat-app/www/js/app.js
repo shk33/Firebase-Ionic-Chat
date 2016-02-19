@@ -35,56 +35,85 @@ angular.module('IonicChatApp', ['ionic', 'chatapp.controllers',
   // Set up the various states which the app can be in.
   // Each state's controller can be found in controllers.js
   $stateProvider
-
-  // setup an abstract state for the tabs directive
-    .state('tab', {
-    url: '/tab',
-    abstract: true,
-    templateUrl: 'templates/tabs.html'
+  
+  .state('main', {
+    url: '/',
+    templateUrl: 'templates/main.html',
+    controller: 'MainCtrl',
+    cache: false,
+    resolve: {
+      'currentAuth': ['FBFactory', 'Loader',
+      function(FBFactory, Loader) {
+        Loader.show('Checking Auth..');
+        return FBFactory.auth().$waitForAuth();
+      }]
+    }
   })
-
-  // Each tab has its own nav history stack:
-
+  .state('tab', {
+    url: "/tab",
+    abstract: true,
+    cache: false,
+    templateUrl: "templates/tabs.html"
+  })
   .state('tab.dash', {
     url: '/dash',
+    cache: false,
     views: {
       'tab-dash': {
         templateUrl: 'templates/tab-dash.html',
         controller: 'DashCtrl'
       }
+    },
+    resolve: {
+      'currentAuth': ['FBFactory', function(FBFactory) {
+        return FBFactory.auth().$requireAuth();
+      }]
     }
   })
-
   .state('tab.chats', {
-      url: '/chats',
-      views: {
-        'tab-chats': {
-          templateUrl: 'templates/tab-chats.html',
-          controller: 'ChatsCtrl'
-        }
+    url: '/chats',
+    cache: false,
+    views: {
+      'tab-chats': {
+        templateUrl: 'templates/tab-chats.html',
+        controller: 'ChatsCtrl'
       }
-    })
-    .state('tab.chat-detail', {
-      url: '/chats/:chatId',
-      views: {
-        'tab-chats': {
-          templateUrl: 'templates/chat-detail.html',
-          controller: 'ChatDetailCtrl'
-        }
-      }
-    })
-
+    },
+    resolve: {
+      'currentAuth': ['FBFactory', function(FBFactory) {
+        return FBFactory.auth().$requireAuth();
+      }]
+    }
+  })
   .state('tab.account', {
     url: '/account',
+    cache: false,
     views: {
       'tab-account': {
         templateUrl: 'templates/tab-account.html',
         controller: 'AccountCtrl'
       }
+    },
+    resolve: {
+      'currentAuth': ['FBFactory', function(FBFactory) {
+        return FBFactory.auth().$requireAuth();
+      }]
+    }
+  })
+  .state('chat-detail', {
+    url: '/chats/:otherUser',
+    templateUrl: 'templates/chat-detail.html',
+    controller: 'ChatDetailCtrl',
+    cache: false,
+    resolve: {
+      'currentAuth': ['FBFactory', 'Loader',
+      function(FBFactory, Loader) {
+        Loader.show('Checking Auth..');
+        return FBFactory.auth().$requireAuth();
+      }]
     }
   });
 
-  // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/tab/dash');
+  $urlRouterProvider.otherwise('/');
 
 });
