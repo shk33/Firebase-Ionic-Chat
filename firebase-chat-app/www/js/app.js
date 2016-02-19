@@ -9,7 +9,7 @@ angular.module('IonicChatApp', ['ionic', 'chatapp.controllers',
 'chatapp.services', 'chatapp.directives', 'ngCordova',
 'ngCordovaOauth', 'firebase'])
 
-.run(function($ionicPlatform) {
+.run(function($ionicPlatform, $rootScope, $state) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -22,26 +22,39 @@ angular.module('IonicChatApp', ['ionic', 'chatapp.controllers',
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
+
+    $rootScope.$on('$stateChangeError', function(event, toState,
+      toParams, fromState, fromParams, error) {
+      if (error === 'AUTH_REQUIRED') {
+        $state.go('main');
+      }
+    });
+
   });
 })
 .constant('FBURL', 'https://shk33-chat-app.firebaseio.com/')
 .constant('GOOGLEKEY', '69018080854-f722la42i4l44lkjiif4ivpr1b9hcesc.apps.googleusercontent.com')
 .constant('GOOGLEAUTHSCOPE', ['email'])
 
-.config(function($stateProvider, $urlRouterProvider) {
+.config(function($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
+
+  $ionicConfigProvider.backButton.previousTitleText(false);
+  $ionicConfigProvider.views.transition('platform');
+  $ionicConfigProvider.navBar.alignTitle('center');
 
   // Ionic uses AngularUI Router which uses the concept of states
   // Learn more here: https://github.com/angular-ui/ui-router
   // Set up the various states which the app can be in.
   // Each state's controller can be found in controllers.js
   $stateProvider
-  
+
   .state('main', {
     url: '/',
     templateUrl: 'templates/main.html',
     controller: 'MainCtrl',
     cache: false,
     resolve: {
+      // When Firebase Auth rejects the promise, it fires a stateChangeError event.
       'currentAuth': ['FBFactory', 'Loader',
       function(FBFactory, Loader) {
         Loader.show('Checking Auth..');
