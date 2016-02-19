@@ -24,6 +24,9 @@ angular.module('IonicChatApp', ['ionic', 'chatapp.controllers',
     }
   });
 })
+.constant('FBURL', 'https://shk33-chat-app.firebaseio.com/')
+.constant('GOOGLEKEY', '69018080854-f722la42i4l44lkjiif4ivpr1b9hcesc.apps.googleusercontent.com')
+.constant('GOOGLEAUTHSCOPE', ['email'])
 
 .config(function($stateProvider, $urlRouterProvider) {
 
