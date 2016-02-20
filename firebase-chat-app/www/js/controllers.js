@@ -95,11 +95,14 @@ angular.module('chatapp.controllers', [])
 
           .then(function(authData) {
             $scope.$broadcast('showChatInterface', authData);
+            console.log('Success');
           }, function(error) {
             Loader.toggle(error);
+            console.log(error);
           });
         }, function(error) {
           Loader.toggle(error);
+          console.log(error);
         });
       }
     });
@@ -389,3 +392,23 @@ angular.module('chatapp.controllers', [])
     });
 
 }])
+
+.controller('AccountCtrl', ['$scope', 'FBFactory', 'UserFactory', '$state',
+  function ($scope, FBFactory, UserFactory, $state) {
+
+    $scope.logout = function () {
+      FBFactory.auth().$unauth();
+      UserFactory.cleanUser();
+      UserFactory.cleanOLUsers();
+      // remove presence
+      var onlineUsers = UserFactory.getOLUsers();
+      if(onlineUsers && onlineUsers.$getRecord) {
+        var presenceId = UserFactory.getPresenceId();
+        var user = onlineUsers.$getRecord();
+        onlineUsers.$remove(user);
+      }
+      UserFactory.cleanPresenceId();
+      $state.go('main');
+    }
+  }
+]);
